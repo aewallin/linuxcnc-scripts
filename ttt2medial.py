@@ -4,11 +4,11 @@ import time
 import ngc_writer            # https://github.com/aewallin/linuxcnc-scripts
 
 ngc_writer.clearance_height=10
-ngc_writer.plunge_height = 2
+ngc_writer.feed_height = 2
 ngc_writer.feed = 200
 ngc_writer.plunge_feed = 100
 
-scale = 7
+scale = 140
 
 def printMedial(vd):
     maw = ovd.MedialAxisWalk(  vd.getGraph() )
@@ -124,7 +124,7 @@ if __name__ == "__main__":
 
     
     # get segments from ttt. NOTE: must set scale so all geometry fits within unit-circle!
-    segs = ttt_segments(  "EMC2", 15000) # (text, scale) all coordinates are divided by scale
+    segs = ttt_segments(  "LinuxCNC", 20000) # (text, scale) all coordinates are divided by scale
     segs = translate(segs, -0.06, 0.05)
     segs = modify_segments(segs)
     

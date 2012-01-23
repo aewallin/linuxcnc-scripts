@@ -137,7 +137,7 @@ if __name__ == "__main__":
     print "( OpenVoronoi",vd.version()," )"
     
     # get segments from ttt. NOTE: must set scale so all geometry fits within unit-circle!
-    segs = ttt_segments(  "A", 20000) # (text, scale) all coordinates are divided by scale
+    segs = ttt_segments(  "LinuxCNC", 20000) # (text, scale) all coordinates are divided by scale
     segs = translate(segs, -0.06, 0.05)
     segs = modify_segments(segs)
     
@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
     ofs_list=[]
     t_before = time.time()
-    for t in [0.001*x for x in range(1,20)]: # this defines the "step-over" and how many offsets we get
+    for t in [0.003*x for x in range(1,20)]: # this defines the "step-over" and how many offsets we get
         ofs = of.offset(t) # generate offset with offset-distance t
         ofs_list.append(ofs)
     t_after = time.time()
