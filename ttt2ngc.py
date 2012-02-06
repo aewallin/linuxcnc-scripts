@@ -13,6 +13,6 @@ def ttt2ngc(text,scale):
 
 if __name__ == "__main__":  
     print "( TTT++",ttt.version()," )"
-    ngc = ttt2ngc(  "TTT++ EMC2", 1000) # (text, scale) all coordinates are divided by scale
+    ngc = ttt2ngc(  "TTT++ LinuxCNC", 1000) # (text, scale) all coordinates are divided by scale
     print ngc
 

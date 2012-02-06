@@ -131,7 +131,7 @@ if __name__ == "__main__":
     times = insert_many_polygons(vd,segs) # insert segments into vd
     print "( ttt2medial.py - experimental v-carving script )"
     print "( TTT++",ttt.version(),"                      )"
-    print "( OpenVoronoi",vd.version(),"                )"
+    print "( OpenVoronoi",ovd.version(),"                )"
     print "( VD built in %02.3f seconds                     )" % ( sum(times))
     print "( VD check: ", vd.check(), "                              )"
     

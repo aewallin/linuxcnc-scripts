@@ -134,7 +134,7 @@ if __name__ == "__main__":
     # int bins = number of bins for grid-search (affects performance, should not affect correctness)
     
     print "( TTT++",ttt.version()," )"
-    print "( OpenVoronoi",vd.version()," )"
+    print "( OpenVoronoi",ovd.version()," )"
     
     # get segments from ttt. NOTE: must set scale so all geometry fits within unit-circle!
     segs = ttt_segments(  "LinuxCNC", 20000) # (text, scale) all coordinates are divided by scale

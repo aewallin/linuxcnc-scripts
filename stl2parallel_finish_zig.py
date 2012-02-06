@@ -45,7 +45,7 @@ def adaptive_path_drop_cutter(s, cutter, path):
     apdc.setCutter(cutter)
     # set the minimum Z-coordinate, or "floor" for drop-cutter
     #apdc.minimumZ = -1 
-    apdc.setSampling(0.4)
+    apdc.setSampling(0.04)
     apdc.setMinSampling(0.0008)
     apdc.setPath( path )
     apdc.run()
@@ -84,7 +84,7 @@ if __name__ == "__main__":
  
     ymin=0
     ymax=12
-    Ny=20  # number of lines in the y-direction
+    Ny=40  # number of lines in the y-direction
     dy = float(ymax-ymin)/(Ny-1)  # the y step-over
     
     # create a simple "Zig" pattern where we cut only in one direction.
@@ -116,6 +116,7 @@ if __name__ == "__main__":
     
     # to reduce the G-code size we filter here. (this is not strictly required and could be omitted)
     # we could potentially detect G2/G3 arcs here, if there was a filter for that.
+    
     tol = 0.001    
     print "( filtering to tolerance %.4f )" % ( tol ) 
     cl_filtered_paths = []
@@ -131,6 +132,6 @@ if __name__ == "__main__":
     
     # output the toolpath (see above)
     printCLPoints(cl_filtered_paths)
-    
+    #printCLPoints(cl_paths)  # comment out the line above, and uncomment this one, to get unfiltered CL-points
 
     
