@@ -145,7 +145,8 @@ if __name__ == "__main__":
     print "( all sites inserted in %.3f seconds )" % ( sum(times))
     print "( VD check: ", vd.check(), " )"
     
-    ovd.PolygonInterior( vd.getGraph(), True ) # polygon interior
+    pi = ovd.PolygonInterior( True ) # polygon interior
+    vd.filter_graph(pi)
     
     of = ovd.Offset( vd.getGraph() ) # pass the filtered graph to the Offset class
 
