@@ -135,8 +135,10 @@ if __name__ == "__main__":
     print "( VD built in %02.3f seconds                     )" % ( sum(times))
     print "( VD check: ", vd.check(), "                              )"
     
-    ovd.PolygonInterior( vd.getGraph() , True ) # filter so that only polygon interior remains
-    ovd.MedialAxis( vd.getGraph() ) # filter so that only medial axis remains
+    pi = ovd.PolygonInterior( True ) # filter so that only polygon interior remains
+    vd.filter_graph(pi)
+    ma = ovd.MedialAxis() # filter so that only medial axis remains
+    vd.filter_graph(ma)
     
     ngc_writer.preamble()
     printMedial( vd )
