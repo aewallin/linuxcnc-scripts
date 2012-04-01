@@ -112,6 +112,21 @@ def ttt_segments(text,scale):
     wr.cubic_biarc_subdivision = 10 # no effect?
     wr.cubic_line_subdivision = 10 # no effect?
     wr.scale = float(1)/float(scale)
+    
+    wr.setFont(3)
+    # 0  freeserif
+    # 1  freeserif bold
+    # 2  freeserif italic
+    # 3  freeserif bold italic
+    # 4  "/usr/share/fonts/truetype/freefont/FreeMonoBold.ttf" );
+    # 5  "/usr/share/fonts/truetype/freefont/FreeMonoBoldOblique.ttf" ); 
+    # 6  "/usr/share/fonts/truetype/freefont/FreeMonoOblique.ttf" )
+    # 7  "/usr/share/fonts/truetype/freefont/FreeSans.ttf" );
+    # 8  "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf" );
+    # 9  "/usr/share/fonts/truetype/freefont/FreeSansBoldOblique.ttf" );
+    # 10 "/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf" );
+    
+    
     ttt.ttt(text,wr) 
     segs = wr.get_segments()
     return segs
