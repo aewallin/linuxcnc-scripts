@@ -1,16 +1,16 @@
 import openvoronoi as ovd    # https://github.com/aewallin/openvoronoi
 import ttt                   # https://github.com/aewallin/truetype-tracer
-import time
 import ngc_writer            # https://github.com/aewallin/linuxcnc-scripts
+import math
+import time
 
 ngc_writer.clearance_height=10
 ngc_writer.feed_height = 2
 ngc_writer.feed = 200
 ngc_writer.plunge_feed = 100
+ngc_writer.metric = True # set False for inch.
 
-scale = 140
-
-def printMedial(vd):
+def printMedial(vd, scale):
     maw = ovd.MedialAxisWalk(  vd.getGraph() )
     toolpath = maw.walk()
     for chain in toolpath:
@@ -19,11 +19,10 @@ def printMedial(vd):
             for point in move:
                 if n==0: # don't draw anything on the first iteration
                     p = point[0]
-                    z = point[1]
+                    zdepth = scale*point[1]
                     ngc_writer.pen_up();
                     ngc_writer.xy_rapid_to( scale*p.x, scale*p.y );
-                    ngc_writer.pen_down()
-                    ngc_writer.plunge( -z ) # now we are at the correct height, at the startpoint of the first move
+                    ngc_writer.pen_down( z= -zdepth )
                 else:
                     p = point[0]
                     z = point[1]
@@ -76,6 +75,7 @@ def insert_many_polygons(vd,segs):
     
     return [pt_time, seg_time]
 
+
 # this translates segments from ttt
 def translate(segs,x,y):
     out = []
@@ -101,8 +101,24 @@ def modify_segments(segs):
         segs_mod.append(seg)
     return segs_mod
 
+# scale all segs so that the overall length becomes desired_length
+def scale_segs(segs, current_length, desired_length):
+    #print " current = ",current_length
+    out=[]
+    scale = float(desired_length) / float(current_length)
+    #print " scale = ",scale
+    for seg in segs:
+        seg2 = []
+        for p in seg:
+            p2 = []
+            p2.append(p[0] * scale)
+            p2.append(p[1] * scale)
+            seg2.append(p2)
+        out.append(seg2)
+    return [out,scale]
+    
 # get segments from ttt
-def ttt_segments(text,scale):
+def ttt_segments(text):
     wr = ttt.SEG_Writer()
     wr.arc = False   # approximate arcs with lines
     wr.conic = False # approximate conic with arc/line
@@ -111,7 +127,7 @@ def ttt_segments(text,scale):
     wr.conic_line_subdivision = 50 # =10 increasesn nr of points to 366, = 5 gives 729 pts
     wr.cubic_biarc_subdivision = 10 # no effect?
     wr.cubic_line_subdivision = 10 # no effect?
-    wr.scale = float(1)/float(scale)
+    wr.scale = 1
     
     wr.setFont(3)
     # 0  freeserif
@@ -126,28 +142,54 @@ def ttt_segments(text,scale):
     # 9  "/usr/share/fonts/truetype/freefont/FreeSansBoldOblique.ttf" );
     # 10 "/usr/share/fonts/truetype/freefont/FreeSansOblique.ttf" );
     
-    
     ttt.ttt(text,wr) 
     segs = wr.get_segments()
-    return segs
+    ext = wr.extents
+    return [ext, segs]
     
-if __name__ == "__main__":  
-    vd = ovd.VoronoiDiagram(1,120) # parameters: (r,bins)  
-    # float r  = radius within which all geometry is located. it is best to use 1 (unit-circle) for now.
-    # int bins = number of bins for grid-search (affects performance, should not affect correctness)
+def get_scaled_segs( chars):
+    # generate segs with scale 1
+    [extents, segs] = ttt_segments( chars )
+    # translate so lower left corner is at (0,0)
+    segs = translate(segs, -extents.minx, -extents.miny )
+    # scale to fit within unit circle
+    current_length = extents.maxx-extents.minx
+    current_height = extents.maxy-extents.miny
+    [segs,scale] = scale_segs(segs, current_length, 0.6)
     
+    segs = modify_segments(segs) # removes duplicate points
+    return [segs, extents,scale]
 
+if __name__ == "__main__":  
+    vd = ovd.VoronoiDiagram(1,120) # parameters: (r,bins)
+    # float r  = radius within which all geometry is located. it is best to use 1 (unit-circle) for now.
+    # int bins = number of bins for grid-search (affects performance, should not affect correctness)  
+    vd.set_silent(True) # suppress Warnings!
     
-    # get segments from ttt. NOTE: must set scale so all geometry fits within unit-circle!
-    segs = ttt_segments(  "LinuxCNC", 20000) # (text, scale) all coordinates are divided by scale
-    segs = translate(segs, -0.06, 0.05)
-    segs = modify_segments(segs)
-    
+    mytext = "-Hello."
+    text_length = 123 # desired text length in user units (set mm or inch for ngc_writer at the top of this file!)
+
+    [segs, extents, scale] = get_scaled_segs( mytext ) 
+    print_scale= float(text_length)/float(0.6)    
     times = insert_many_polygons(vd,segs) # insert segments into vd
+    
+    # count the number of segments
+    num_segs = 0
+    for s in segs:
+        num_segs = num_segs + len(s)
+    
+    text_length = (extents.maxx-extents.minx)*scale*print_scale
+    text_height = (extents.maxy-extents.miny)*scale*print_scale
+    
+    # print comments to g-code file
     print "( ttt2medial.py - experimental v-carving script )"
     print "( TTT++",ttt.version(),"                      )"
     print "( OpenVoronoi",ovd.version(),"                )"
-    print "( VD built in %02.3f seconds                     )" % ( sum(times))
+    print "( number of polygons: ", len(segs),"                )"
+    print "( number of segments: ", num_segs ,"                )"
+    print "( text length: ", text_length ," )"
+    print "( text height: ",text_height,"                )"
+    print "( VD built in %02.3f seconds   = %02f  us* n*log2{n} )" % ( sum(times), 1e6*float(sum(times))/(float(num_segs)*float(math.log10(num_segs)/math.log10(2)))    )
     print "( VD check: ", vd.check(), "                              )"
     
     pi = ovd.PolygonInterior( True ) # filter so that only polygon interior remains
@@ -156,5 +198,5 @@ if __name__ == "__main__":
     vd.filter_graph(ma)
     
     ngc_writer.preamble()
-    printMedial( vd )
+    printMedial( vd , print_scale) # the actual cutting g-code
     ngc_writer.postamble()
