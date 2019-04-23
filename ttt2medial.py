@@ -1,6 +1,6 @@
-import openvoronoi as ovd    # https://github.com/aewallin/openvoronoi
-import ttt                   # https://github.com/aewallin/truetype-tracer
-import ngc_writer            # https://github.com/aewallin/linuxcnc-scripts
+import openvoronoi as ovd     # https://github.com/aewallin/openvoronoi
+import truetypetracer as ttt  # https://github.com/aewallin/truetype-tracer
+import ngc_writer             # https://github.com/aewallin/linuxcnc-scripts
 import math
 import time
 
